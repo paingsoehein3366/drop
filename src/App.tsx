@@ -3,14 +3,17 @@ import './App.css';
 import { Button, Table, Title } from '@mantine/core';
 import { useGetUsers } from './api';
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
+import { AddList } from './add-list';
 
 function App() {
+  const [open, setOpen] = useState(false);
   const { data } = useGetUsers();
   const [users, setUsers] = useState(data?.data || []);
 
   useEffect(() => {
-    setUsers(data?.data)
-  }, [])
+    setUsers(data?.data);
+    console.log('useEffect');
+  }, [data?.count])
 
 
   function handleDragEnd(event: any) {
@@ -20,13 +23,12 @@ function App() {
       console.log(`Dropped ${active.id} onto ${over.id}`);
 
       const draggedUserIndex = users.findIndex((user, index) => `draggable-${index}` === active.id);
-      console.log('usdraggedUserIndexer', draggedUserIndex);
 
       if (draggedUserIndex !== -1) {
         const updatedUsers = [...users];
+        console.log('updatedUsers:', updatedUsers.splice(draggedUserIndex, 1));
         const [draggedUser] = updatedUsers.splice(draggedUserIndex, 1);
         updatedUsers.push(draggedUser);
-        console.log('updatedUsers:', updatedUsers);
 
         setUsers(updatedUsers);
       }
@@ -37,7 +39,7 @@ function App() {
     <>
       <div className='flex justify-between'>
         <Title order={3}>User List</Title>
-        <Button>Add User</Button>
+        <Button onClick={() => setOpen(true)}>Add User</Button>
       </div>
       <DndContext onDragEnd={handleDragEnd}>
         <Droppable id='droppable'>
@@ -52,10 +54,10 @@ function App() {
             </Table.Thead>
             <Table.Tbody>
               {users?.map((user, index) => (
-                <Draggable key={user.name} id={`draggable-${index}`} index={index}>
-                  <Table.Td>{user.name}</Table.Td>
-                  <Table.Td>{user.email}</Table.Td>
-                  <Table.Td>{user.age}</Table.Td>
+                <Draggable key={user?.id} id={`draggable-${index}`} index={index}>
+                  <Table.Td>{user?.name}</Table.Td>
+                  <Table.Td>{user?.email}</Table.Td>
+                  <Table.Td>{user?.age}</Table.Td>
                   <Table.Td>
                     <Button color='red'>Edit</Button>
                   </Table.Td>
@@ -65,6 +67,7 @@ function App() {
           </Table>
         </Droppable>
       </DndContext>
+      <AddList open={open} onClose={() => setOpen(false)} />
     </>
   );
 }
