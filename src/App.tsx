@@ -1,108 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
-import { Button, Table, Title } from '@mantine/core';
-import { useGetUsers } from './api';
-import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
-import { AddList } from './add-list';
+import { closestCorners, DndContext } from "@dnd-kit/core";
+import "./App.css";
+import { useState } from "react";
+import { Column } from "./components/Column/Column";
 
-function App() {
-  const [open, setOpen] = useState(false);
-  const { data } = useGetUsers();
-  const [users, setUsers] = useState(data?.data || []);
-
-  useEffect(() => {
-    setUsers(data?.data);
-    console.log('useEffect');
-  }, [data?.count])
-
-
-  function handleDragEnd(event: any) {
+export default function App() {
+  const [tasks, setTasks] = useState([
+    { id: 1, name: "Task 1", done: false },
+    { id: 2, name: "Task 2", done: false },
+    { id: 3, name: "Task 3", done: false },
+    { id: 4, name: "Task 4", done: false },
+  ]);
+  const handleDragEnd = (event: any) => {
     const { active, over } = event;
+    console.log({ active }, { over });
 
-    if (over && over.data.current.accepts.includes(active.data.current.type)) {
-      console.log(`Dropped ${active.id} onto ${over.id}`);
-
-      const draggedUserIndex = users.findIndex((user, index) => `draggable-${index}` === active.id);
-
-      if (draggedUserIndex !== -1) {
-        const updatedUsers = [...users];
-        console.log('updatedUsers:', updatedUsers.splice(draggedUserIndex, 1));
-        const [draggedUser] = updatedUsers.splice(draggedUserIndex, 1);
-        updatedUsers.push(draggedUser);
-
-        setUsers(updatedUsers);
-      }
+    if (active.id !== over.id) {
+      setTasks((tasks) => {
+        const oldIndex = tasks.findIndex((task) => task.id === active.id);
+        const newIndex = tasks.findIndex((task) => task.id === over.id);
+        const newTasks = [...tasks];
+        newTasks.splice(newIndex, 0, newTasks.splice(oldIndex, 1)[0]);
+        return newTasks;
+      });
     }
-  }
-
+  };
   return (
-    <>
-      <div className='flex justify-between'>
-        <Title order={3}>User List</Title>
-        <Button onClick={() => setOpen(true)}>Add User</Button>
-      </div>
-      <DndContext onDragEnd={handleDragEnd}>
-        <Droppable id='droppable'>
-          <Table striped highlightOnHover withTableBorder>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th className='text-center'>Name</Table.Th>
-                <Table.Th className='text-center'>Email</Table.Th>
-                <Table.Th className='text-center'>Age</Table.Th>
-                <Table.Th className='text-center'>Action</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {users?.map((user, index) => (
-                <Draggable key={user?.id} id={`draggable-${index}`} index={index}>
-                  <Table.Td>{user?.name}</Table.Td>
-                  <Table.Td>{user?.email}</Table.Td>
-                  <Table.Td>{user?.age}</Table.Td>
-                  <Table.Td>
-                    <Button color='red'>Edit</Button>
-                  </Table.Td>
-                </Draggable>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </Droppable>
+    <div className="App">
+      <h1>My Tasks</h1>
+      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
+        <Column tasks={tasks} />
       </DndContext>
-      <AddList open={open} onClose={() => setOpen(false)} />
-    </>
+    </div>
   );
 }
-
-function Droppable({ id, children }: { id: string, children: React.ReactNode }) {
-  const { setNodeRef } = useDroppable({
-    id,
-    data: {
-      accepts: ['user'],
-    },
-  });
-
-  return <div ref={setNodeRef}>{children}</div>;
-}
-
-function Draggable({ id, index, children }: { id: string, index: number, children: React.ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-    data: {
-      type: 'user',
-      index,
-    },
-  });
-
-  const style = transform
-    ? {
-      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    }
-    : undefined;
-
-  return (
-    <Table.Tr ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
-    </Table.Tr>
-  );
-}
-
-export default App;

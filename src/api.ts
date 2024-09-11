@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { api } from "./lib/axios"
 
 export type ApiDto = {
-  data: { name: string, email: string, age: number, id: number }[],
+  data: { name: string, email: string, age: number, id: number },
   count: number,
 }
 
