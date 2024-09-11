@@ -1,7 +1,16 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Badge, Card, Group, Image, Text } from "@mantine/core";
 
-export const Task = ({ id, name }: { id: number; name: string }) => {
+export const Task = ({
+  id,
+  name,
+  image_url,
+}: {
+  id: number;
+  name: string;
+  image_url: string;
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
@@ -10,16 +19,24 @@ export const Task = ({ id, name }: { id: number; name: string }) => {
     transition,
   };
   return (
-    <div>
-      <h1
-        ref={setNodeRef}
-        {...attributes}
-        {...listeners}
-        style={style}
-        className="w-[300px] p-2 bg-green-400 m-4 rounded text-white"
-      >
-        {name}
-      </h1>
-    </div>
+    <Card
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={style}
+      shadow="sm"
+      className="w-[300px] m-5 p-2 rounded border"
+    >
+      <Card.Section>
+        <Image src={image_url} height={160} />
+      </Card.Section>
+      <Group justify="space-between" mt="md" mb="xs">
+        <Text>Norway Fjord Adventures</Text>
+        <Badge color="pink">On Sale</Badge>
+      </Group>
+      <Text size="sm" c="dimmed">
+        With Fjord Tours you can explore more of the magical fjord landscapes
+      </Text>
+    </Card>
   );
 };
