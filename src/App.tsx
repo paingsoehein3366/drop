@@ -1,20 +1,8 @@
-import {
-  closestCenter,
-  closestCorners,
-  DndContext,
-  useSensors,
-} from "@dnd-kit/core";
+import { closestCenter, DndContext, useSensors } from "@dnd-kit/core";
 import "./App.css";
 import { useState } from "react";
 import { Column } from "./components/Column/Column";
-import { FaPlus } from "react-icons/fa6";
-import { Card, Text } from "@mantine/core";
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { Task } from "./Task/Task";
+import { SortableContext } from "@dnd-kit/sortable";
 
 export default function App() {
   const [tasks, setTasks] = useState([
@@ -51,55 +39,54 @@ export default function App() {
         "https://static.desygner.com/wp-content/uploads/sites/13/2022/05/04141642/Free-Stock-Photos-01-1536x1024.jpg",
     },
   ]);
+
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    console.log(event);
+    if (!over) return;
+    console.log({ active }, { over });
 
     if (active.id !== over.id) {
       setTasks((tasks) => {
-        const changeTypeOver = tasks.filter((task) => task.id === over.id)[0]
-          .type;
-        const changeTypeActive = tasks.filter(
-          (task) => task.id === active.id
-        )[0].type;
-
         const oldIndex = tasks.findIndex((task) => task.id === active.id);
         const newIndex = tasks.findIndex((task) => task.id === over.id);
-        const checkType = tasks.map((task) => {
-          if (task.id === active.id) {
-            return { ...task, type: changeTypeOver };
-          }
-          return task;
-        });
-        const newTasks = [...checkType];
-        newTasks.splice(newIndex, 0, newTasks.splice(oldIndex, 1)[0]);
+        const activeTask = tasks[oldIndex];
+        if (activeTask.type !== tasks[newIndex].type) {
+          activeTask.type = tasks[newIndex].type;
+        }
+
+        const newTasks = [...tasks];
+        newTasks.splice(oldIndex, 1);
+        newTasks.splice(newIndex, 0, activeTask);
         return newTasks;
       });
     }
   };
-  const sensors = useSensors();
-  const header = [
+
+  const headers = [
     { id: 1, label: "TO DO", value: "todo" },
     { id: 2, label: "IN PROGRESS", value: "processing" },
     { id: 3, label: "DONE", value: "done" },
   ];
+
   return (
     <div className="App">
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        {/* <Column tasks={tasks} /> */}
-        <SortableContext items={header}>
-          <div className="flex gap-4">
-            {header.map((item) => (
+        <div className="flex gap-4">
+          {headers.map((header) => (
+            <SortableContext
+              key={header.id}
+              items={tasks.filter((task) => task.type === header.value)}
+            >
               <Column
-                key={item.id}
+                key={header.id}
                 tasks={tasks}
-                id={item.id}
-                label={item.label}
-                type={item.value}
-              ></Column>
-            ))}
-          </div>
-        </SortableContext>
+                id={header.id}
+                label={header.label}
+                type={header.value}
+              />
+            </SortableContext>
+          ))}
+        </div>
       </DndContext>
     </div>
   );

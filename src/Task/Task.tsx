@@ -18,6 +18,7 @@ export const Task = ({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
   return (
     <Card
       ref={setNodeRef}
@@ -31,7 +32,7 @@ export const Task = ({
         <Image src={image_url} height={160} />
       </Card.Section>
       <Group justify="space-between" mt="md" mb="xs">
-        <Text>Norway Fjord Adventures</Text>
+        <Text>{name}</Text>
         <Badge color="pink">On Sale</Badge>
       </Group>
       <Text size="sm" c="dimmed">
