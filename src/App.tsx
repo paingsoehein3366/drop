@@ -1,7 +1,20 @@
-import { closestCorners, DndContext } from "@dnd-kit/core";
+import {
+  closestCenter,
+  closestCorners,
+  DndContext,
+  useSensors,
+} from "@dnd-kit/core";
 import "./App.css";
 import { useState } from "react";
 import { Column } from "./components/Column/Column";
+import { FaPlus } from "react-icons/fa6";
+import { Card, Text } from "@mantine/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { Task } from "./Task/Task";
 
 export default function App() {
   const [tasks, setTasks] = useState([
@@ -9,7 +22,7 @@ export default function App() {
       id: 1,
       name: "Task 1",
       done: false,
-      type: "test",
+      type: "todo",
       image_url:
         "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png",
     },
@@ -17,7 +30,7 @@ export default function App() {
       id: 2,
       name: "Task 2",
       done: false,
-      type: "test",
+      type: "todo",
       image_url:
         "https://gratisography.com/wp-content/uploads/2024/03/gratisography-funflower-1170x780.jpg",
     },
@@ -40,7 +53,7 @@ export default function App() {
   ]);
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    console.log({ active }, { over });
+    console.log(event);
 
     if (active.id !== over.id) {
       setTasks((tasks) => {
@@ -59,18 +72,34 @@ export default function App() {
           return task;
         });
         const newTasks = [...checkType];
-        // const newTasks = [...tasks];
         newTasks.splice(newIndex, 0, newTasks.splice(oldIndex, 1)[0]);
-
         return newTasks;
       });
     }
   };
+  const sensors = useSensors();
+  const header = [
+    { id: 1, label: "TO DO", value: "todo" },
+    { id: 2, label: "IN PROGRESS", value: "processing" },
+    { id: 3, label: "DONE", value: "done" },
+  ];
   return (
     <div className="App">
-      <h1>My Tasks</h1>
-      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
-        <Column tasks={tasks} />
+      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+        {/* <Column tasks={tasks} /> */}
+        <SortableContext items={header}>
+          <div className="flex gap-4">
+            {header.map((item) => (
+              <Column
+                key={item.id}
+                tasks={tasks}
+                id={item.id}
+                label={item.label}
+                type={item.value}
+              ></Column>
+            ))}
+          </div>
+        </SortableContext>
       </DndContext>
     </div>
   );

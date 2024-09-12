@@ -1,63 +1,51 @@
 import {
   SortableContext,
+  useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Task } from "../../Task/Task";
-import { Table } from "@mantine/core";
+import { Text } from "@mantine/core";
+import { FaPlus } from "react-icons/fa6";
 
-export const Column = ({ tasks }: { tasks: any[] }) => {
-  const test = tasks.filter((item: any) => item.type === "test");
-  const processing = tasks.filter((item: any) => item.type === "processing");
-  const done = tasks.filter((item: any) => item.type === "done");
+export const Column = ({
+  tasks,
+  id,
+  label,
+  type,
+}: {
+  tasks: any[];
+  id: number;
+  label: string;
+  type: string;
+}) => {
+  const { attributes, listeners, setNodeRef } = useSortable({ id });
   return (
-    <div>
+    <div
+      className="bg-gray-300 rounded  min-w-72"
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+    >
+      <Text className="border-b-2 py-2">{label}</Text>
       <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
-        <Table withColumnBorders withRowBorders>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Element position</Table.Th>
-              <Table.Th>Element name</Table.Th>
-              <Table.Th>Symbol</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            <Table.Tr>
-              <Table.Td>
-                {test.map((item) => (
-                  <Task
-                    image_url={item.image_url}
-                    key={item.id}
-                    id={item.id}
-                    name={item.name}
-                  />
-                ))}
-              </Table.Td>
-
-              <Table.Td>
-                {processing.map((item) => (
-                  <Task
-                    image_url={item.image_url}
-                    key={item.id}
-                    id={item.id}
-                    name={item.name}
-                  />
-                ))}
-              </Table.Td>
-
-              <Table.Td>
-                {done.map((item) => (
-                  <Task
-                    image_url={item.image_url}
-                    key={item.id}
-                    id={item.id}
-                    name={item.name}
-                  />
-                ))}
-              </Table.Td>
-            </Table.Tr>
-          </Table.Tbody>
-        </Table>
+        {tasks.map((card) => (
+          <div key={card.id}>
+            {card.type == type ? (
+              <Task
+                id={card.id}
+                name={card.name}
+                image_url={card.image_url}
+              ></Task>
+            ) : (
+              ""
+            )}
+          </div>
+        ))}
       </SortableContext>
+      <div className="hover:bg-gray-200 flex items-center cursor-pointer p-2 m-2 hover:rounded-md">
+        <FaPlus />
+        Create issue
+      </div>
     </div>
   );
 };
